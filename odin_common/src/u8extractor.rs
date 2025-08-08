@@ -50,7 +50,7 @@ use memchr::memmem::Finder;
 /// find keys and respective values in a given &[u8] buffer. 
 /// Use like so:
 /// ```
-///     use odin_common::u8extractor::{extract,SimpleU8Finder};
+///     use odin_common::{extract_all,u8extractor::SimpleU8Finder};
 /// 
 ///     let buf: &[u8] = b"{\"key1\":42,\"key2\":\"foo\"}";
 ///    
@@ -59,7 +59,7 @@ use memchr::memmem::Finder;
 ///    
 ///     println!("haystack={}", str::from_utf8(buf).unwrap());
 ///    
-///     extract! { buf ? 
+///     extract_all! { buf ? 
 ///         let v1: u64 = find_key1,
 ///         let v2: &str = find_key2 => {
 ///             println!("got v1={v1}, v2={v2}");
@@ -68,8 +68,7 @@ use memchr::memmem::Finder;
 ///```
 /// 
 /// which gets expanded into:
-/// ```
-///     ...
+/// ```macro_expand
 ///     if let Some(i) = extract_key1.find_key(buf)
 ///     && let Some((v1,len)) = U8Readable::from_u8::<u64>( buf, i + extract_key1.len())
 ///     && let Some(i) = extract_key12.find_key(buf)
@@ -200,20 +199,26 @@ impl<'a> MemMemFinder<'a> {
 /// macro to extract CSV fields from an CsvExtractor
 ///  
 /// ```
-///     extraxt_fields{ line ?
+///     use odin_common::{extract_fields,u8extractor::{CsvExtractor,CsvFieldExtractor}};
+///     let data = b",\"foo, bar\",42,\r\none,two,43";
+///     let cursor = std::io::Cursor::new(data);
+/// 
+///     let mut csv = CsvExtractor::new(cursor);
+///     csv.next_line().expect("input");
+///     extract_fields!{ csv ?
 ///         let spd: f64 = [4],
 ///         let vrate: i64 = [7] => {
-///            ...
+///            println!("{spd} {vrate}");
 ///         }
 ///     }
 /// ```
 /// 
 /// which is expanded to 
 /// 
-/// ```
+/// ```macro_expand
 ///     if let Some(spd) = line.field::<f64>(4)
 ///     && let Some(vrate) = line.field::<i64>(7) {
-///         ...
+///        println!("{spd} {vrate}");
 ///     }
 /// ```
 #[macro_export]
@@ -242,12 +247,13 @@ const SEP: u8 = b',';
 /// use like so:
 /// 
 /// ```
+///    use odin_common::u8extractor::{CsvExtractor,CsvFieldExtractor,CsvStr};
 ///    let data = b",\"foo, bar\",42,\r\none,two,43";
 ///    let cursor = std::io::Cursor::new(data);
 /// 
 ///    let mut csv = CsvExtractor::new(cursor);
 ///
-///    while csv.next_line() {
+///    while csv.next_line().expect("Err") {
 ///        println!("---- {}", csv.line());
 ///        println!("[0] = {:?}", csv.field::<CsvStr>(0));
 ///        println!("[1] = {:?}", csv.field::<CsvStr>(1));

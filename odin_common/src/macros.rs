@@ -29,9 +29,9 @@
 /// This is an example for pure side effects:
 /// ```
 /// use odin_common::if_let;
-/// let p: Option<i64> = ...
-/// let q: Result<i64,&'static str> = ...
-/// fn foo (n:i64, m:i64)->Result<&'static str,&'static str> { ... }
+/// let p: Option<i64> = None;
+/// let q: Result<i64,&'static str> = Ok(42);
+/// fn foo (n:i64, m:i64)->Result<&'static str,&'static str> { Ok("42") }
 /// 
 /// if_let! {
 ///     Some(a) = p,
@@ -42,7 +42,7 @@
 /// }
 /// ```
 /// which gets expanded into:
-/// ```
+/// ```macro_expand
 /// if let Some(a) = p {
 ///     if let Ok(b) = q {
 ///         if let Ok(c) = foo(a, b) {
@@ -54,6 +54,10 @@
 /// 
 /// Here is an example for pure side effects that uses fail closures (e.g. for error reporting)
 /// ```
+/// use odin_common::if_let;
+/// let p: Option<i64> = None;
+/// let q: Result<i64,&'static str> = Ok(42);
+/// fn foo (n:i64, m:i64)->Result<&'static str,&'static str> { Ok("42") }
 /// if_let! {
 ///     Some(a) = p,
 ///     Ok(b) = { q } else |other| { println!("no b: {other:?}") },
@@ -64,20 +68,27 @@
 /// ```
 /// which expands to:
 /// ```
+/// let p: Option<i64> = None;
+/// let q: Result<i64,&'static str> = Ok(42);
+/// fn foo (n:i64, m:i64)->Result<&'static str,&'static str> { Ok("42") }
 /// if let Some(a) = p {
-///     match { q } {
+///     match q {
 ///         Ok(b) => {
 ///             match { foo(a, b) } {
 ///                 Ok(c) => { println!("just here to print a={}, b={}, c={}", a,b,c) }
-///                 x => { |e|{ println!("no c: {e:?}") }(x) }
+///                 other => { println!("no c: {other:?}") }
 ///             }
 ///         }
-///         x => { |e|{println!("no b: {e:?}")}(x) }
+///         other => { println!("no b: {other:?}") }
 ///     }
 /// } 
 /// ```
 /// This is finally an example that uses the `if_let` value and fail closures (providing failure values)
 /// ```
+/// use odin_common::if_let;
+/// let p: Option<i64> = None;
+/// let q: Result<i64,&'static str> = Ok(42);
+/// fn foo (n:i64, m:i64)->Result<&'static str,&'static str> { Ok("42") }
 /// let res = if_let! {
 ///     Some(a) = { p } else { println!("no a"); -1 },
 ///     Ok(b)   = { q } else |e| { println!("no b: {e:?}"); -2 }, 
@@ -89,7 +100,7 @@
 /// println!("res = {res}");
 /// ``` 
 /// which is expanded into:
-/// ```
+/// ```macro_expand
 /// let res = if let Some(a) = { p } {
 ///     match { q } {
 ///         Ok(b) => {
@@ -188,13 +199,13 @@ macro_rules! map_to_opaque_error {
 /// 
 /// fn main () {
 ///    check_cli!(ARGS); // makes sure we exit on -h or --help (and do not execute anything until we know ARGS parsed)
-///    ... 
-///    let config = &ARGS.config; 
-///    ...
+///
+///    let config = &ARGS.config;
+///
 /// }
 /// ```
 /// expands into:
-/// ```
+/// ```macro_expand
 /// use structopt::StructOpt;
 /// use lazy_static::lazy_static;
 /// 
@@ -247,13 +258,14 @@ macro_rules! check_cli {
 
 /// syntactic sugar macro to define thiserror Error enums:
 /// ```
+/// use odin_common::define_error;
 /// define_error!{ pub OdinNetError = 
 ///   IOError( #[from] std::io::Error ) : "IO error: {0}",
 ///   OpFailed(String) : "operation failed: {0}"
 /// }
 /// ```
 /// will get expanded into
-/// ```
+/// ```macro_expand
 /// use thiserror;
 /// pub enum OdinNetError {
 ///     #[error("IO error: {0}")]
