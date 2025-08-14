@@ -190,18 +190,19 @@ macro_rules! map_to_opaque_error {
 /* #region define_cli  ****************************************************************************************/
 
 /// syntactic sugar macro for structopt based command line interface definition
-/// ```
+/// ```no_run
+/// use odin_common::{check_cli,define_cli};
+///
 /// define_cli! { ARGS [about="my silly prog"] = 
 ///   verbose: bool        [help="run verbose", short],
-///   date: DateTime<Utc>  [help="start date", from_os_str=parse_utc_datetime_from_os_str_date],
+///   date: String         [help="start date"],
 ///   config: String       [help="pathname of config", long, default_value="blah"]
 /// }
 /// 
 /// fn main () {
 ///    check_cli!(ARGS); // makes sure we exit on -h or --help (and do not execute anything until we know ARGS parsed)
-///
 ///    let config = &ARGS.config;
-///
+///    // rest of code
 /// }
 /// ```
 /// expands into:
@@ -329,12 +330,16 @@ macro_rules! define_serde_struct {
 /// 
 /// Use like so:
 /// ```
-/// struct GeoPoint {...}
+/// use odin_common::impl_deserialize_struct;
+/// use serde::de::{self, Deserialize as DeserializeTrait, Deserializer, Visitor, SeqAccess, MapAccess};
+/// use std::{error::Error,fmt};
+///
+/// struct GeoPoint {x: i32, y: i32}
 /// impl GeoPoint {
-///   fn from_lon_lat_degrees (lon: .., lat: ..)->Self {...}
+///   fn from_lon_lat_degrees (lon: i32, lat: i32)->Self { Self{x:lon, y:lat} }
 /// }
 /// 
-/// impl_deserialize_struct!{ GeoPoint::from_lon_lat_degrees( lon, ["longitude", "x"], lat, ["latitude", "y"]) }
+/// impl_deserialize_struct!{ GeoPoint::from_lon_lat_degrees(lon | longitude | x, lat | latitude | y) }
 /// ```
 #[macro_export]
 macro_rules! impl_deserialize_struct {
