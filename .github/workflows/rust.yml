@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Cleanup
+      run: |
+        sudo rm -fr /usr/local/lib/android /usr/local/.ghcup /opt/hostedtoolcache \
+          /usr/share/swift /usr/local/share/powershell /usr/lib/jvm /usr/local/julia* \
+          /opt/microsoft /opt/az /usr/local/share/chromium /opt/google
     - name: Install GDAL
       run: sudo apt install libgdal-dev
     - name: Build
@@ -23,6 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Cleanup
+      run: |
+        sudo rm -fr /usr/local/lib/android /usr/local/.ghcup /opt/hostedtoolcache \
+          /usr/share/swift /usr/local/share/powershell /usr/lib/jvm /usr/local/julia* \
+          /opt/microsoft /opt/az /usr/local/share/chromium /opt/google
     - name: Install GDAL
       run: sudo apt install libgdal-dev
     - name: Test
@@ -32,6 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Cleanup
+      run: |
+        sudo rm -fr /usr/local/lib/android /usr/local/.ghcup /opt/hostedtoolcache \
+          /usr/share/swift /usr/local/share/powershell /usr/lib/jvm /usr/local/julia* \
+          /opt/microsoft /opt/az /usr/local/share/chromium /opt/google
     - name: Install GDAL
       run: sudo apt install libgdal-dev
     - name: Doc
