@@ -21,6 +21,8 @@ jobs:
         packages: libgdal-dev
         version: 1.0
 
+    - name: Cleanup
+      run: sudo rm -fr /usr/local/lib/android /usr/local/.ghcup /opt/hostedtoolcache /usr/share/swift /usr/local/share/powershell /usr/lib/jvm /usr/local/julia* /opt/microsoft /opt/az /usr/local/share/chromium /opt/google
     - name: Build
       run: cargo build --verbose
     - name: Run tests
